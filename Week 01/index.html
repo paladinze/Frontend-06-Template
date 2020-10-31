@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>week 1: tic tac toe</title>
+        <style>
+            .cell {
+                width: 100px;
+                height: 100px;
+                display: inline-block;
+                border: solid 1px salmon;
+                background-color: sandybrown;
+                font-size: 50px;
+                text-align: center;
+                vertical-align: middle;
+                line-height: 100px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div>
+            <h1>tic tac toe</h1>
+        </div>
+        <div id="board"></div>
+        <script>
+            const boardValues = [
+                [2, 1, 0],
+                [0, 1, 0],
+                [0, 0, 1],
+            ];
+            let lastColor = 1;
+
+            const drawBoard = () => {
+                const board = document.getElementById('board');
+                board.innerHTML = '';
+
+                for (let i=0; i< 3; i++) {
+                    for (let j=0; j < 3; j++) {
+                        const currCellVal = boardValues[i][j];
+                        const cell = document.createElement('div');
+                        cell.classList.add('cell');
+                        cell.innerText = currCellVal === 1 ? '🚀' :
+                                        currCellVal === 2 ? '🏎' : '';
+                        cell.addEventListener('click', () => {
+                            if (currCellVal !== 0) {
+                                return;
+                            }
+                            move(j, i)
+                        });
+                        board.append(cell);
+                    }
+                    board.append(document.createElement('br'));
+                }
+            }
+
+            const move = (x, y) => {
+                lastColor = 3 - lastColor;
+                boardValues[y][x] = lastColor;
+                drawBoard();
+            };
+
+            drawBoard();
+        </script>
+    </body>
+</html>
