@@ -24,9 +24,9 @@
         <div id="board"></div>
         <script>
             const boardValues = [
-                [2, 1, 0],
-                [0, 1, 0],
-                [0, 0, 1],
+                [0, 0, 0],
+                [0, 0, 0],
+                [0, 0, 0],
             ];
             let lastColor = 1;
 
@@ -54,9 +54,56 @@
             }
 
             const move = (x, y) => {
-                lastColor = 3 - lastColor;
-                boardValues[y][x] = lastColor;
+                boardValues[y][x] = 3 - lastColor;
+                lastColor = boardValues[y][x];
                 drawBoard();
+                if (checkIsWon(boardValues)) {
+                    alert((lastColor === 1 ? '🚀' : '🏎') + ' has won')
+                }
+            };
+
+            const checkIsWon = (boardValues) => {
+                for (let i = 0; i < 3; i++) {
+                    let isWon = true;
+                    for (let j = 0; j < 3; j++) {
+                        if (boardValues[i][j] !== lastColor) {
+                            isWon = false;
+                        }
+                    }
+                    if (isWon) return true;
+                }
+
+                for (let i = 0; i < 3; i++) {
+                    let isWon = true;
+                    for (let j = 0; j < 3; j++) {
+                        if (boardValues[j][i] !== lastColor) {
+                            isWon = false;
+                        }
+                    }
+                    if (isWon) return true;
+                }
+
+                {
+                    let isWon = true;
+                    for (let i = 0; i < 3; i++) {
+                        if (boardValues[i][i] !== lastColor) {
+                            isWon = false;
+                        }
+                    }
+                    if (isWon) return true;
+                }
+
+                {
+                    let isWon = true;
+                    for (let i = 0; i < 3; i++) {
+                        if (boardValues[i][2-i] !== lastColor) {
+                            isWon = false;
+                        }
+                    }
+                    if (isWon) return true;
+                }
+
+                return false;
             };
 
             drawBoard();
