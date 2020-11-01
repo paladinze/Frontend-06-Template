@@ -30,7 +30,7 @@
             ];
             let currColor = 1;
 
-            const drawBoard = () => {
+            const drawBoard = (boardValues) => {
                 const board = document.getElementById('board');
                 board.innerHTML = '';
 
@@ -51,6 +51,7 @@
                     }
                     board.append(document.createElement('br'));
                 }
+                console.log(getBestMove(boardValues, currColor));
             }
 
             const move = (x, y) => {
@@ -59,8 +60,8 @@
                     alert((currColor === 1 ? '🚀' : '🏎') + ' has won')
                 }
                 currColor = 3 - currColor;
-                drawBoard();
-                if (willWin(boardValues, currColor)) {
+                drawBoard(boardValues);
+                if (!!getWinMove(boardValues, currColor)) {
                     console.log((currColor === 1 ? '🚀' : '🏎') + ' will win')
                 }
             };
@@ -69,14 +70,16 @@
                 return JSON.parse(JSON.stringify(pattern))
             }
 
-            const willWin = (boardValues, color) => {
-                let willWin = false;
+            const getWinMove = (boardValues, color) => {
+                let willWin = null;
                 for (let i=0; i< 3; i++) {
                     for (let j=0; j < 3; j++) {
                         if (!!boardValues[i][j]) continue;
                         let clonedBoard = clone(boardValues);
                         clonedBoard[i][j] = color;
-                        if (checkIsWon(clonedBoard, color)) willWin = true;
+                        if (checkIsWon(clonedBoard, color)) {
+                            willWin = [j, i];
+                        }
                     }
                 }
                 return  willWin;
@@ -126,7 +129,42 @@
                 return false;
             };
 
-            drawBoard();
+            const getBestMove = (boardValues, color) => {
+                let nextMove = null;
+                let reward = -2;
+
+                // check if can win directly
+                nextMove = getWinMove(boardValues, color);
+                if (!!nextMove) {
+                    return {
+                        nextMove,
+                        reward: 1
+                    }
+                }
+
+                // make the move that will cause the worst outcome for opponent
+                for (let i=0; i<3; i++) {
+                    for (let j=0; j<3; j++) {
+                        if (boardValues[i][j]) {
+                            continue;
+                        }
+                        let clonedBoard = clone(boardValues);
+                        clonedBoard[i][j] = color;
+                        const enemyBestChoice = getBestMove(clonedBoard, 3 - color);
+                        if (-enemyBestChoice.reward > reward) {
+                            reward = -enemyBestChoice.reward;
+                            nextMove = [j, i];
+                        }
+                    }
+                }
+                return {
+                    nextMove,
+                    reward: nextMove ? reward : 0
+                }
+
+            };
+
+            drawBoard(boardValues);
         </script>
     </body>
 </html>
