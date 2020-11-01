@@ -28,7 +28,7 @@
                 [0, 0, 0],
                 [0, 0, 0],
             ];
-            let lastColor = 1;
+            let currColor = 1;
 
             const drawBoard = () => {
                 const board = document.getElementById('board');
@@ -54,19 +54,39 @@
             }
 
             const move = (x, y) => {
-                boardValues[y][x] = 3 - lastColor;
-                lastColor = boardValues[y][x];
+                boardValues[y][x] = currColor;
+                if (checkIsWon(boardValues, currColor)) {
+                    alert((currColor === 1 ? '🚀' : '🏎') + ' has won')
+                }
+                currColor = 3 - currColor;
                 drawBoard();
-                if (checkIsWon(boardValues)) {
-                    alert((lastColor === 1 ? '🚀' : '🏎') + ' has won')
+                if (willWin(boardValues, currColor)) {
+                    console.log((currColor === 1 ? '🚀' : '🏎') + ' will win')
                 }
             };
 
-            const checkIsWon = (boardValues) => {
+            const clone = (pattern) => {
+                return JSON.parse(JSON.stringify(pattern))
+            }
+
+            const willWin = (boardValues, color) => {
+                let willWin = false;
+                for (let i=0; i< 3; i++) {
+                    for (let j=0; j < 3; j++) {
+                        if (!!boardValues[i][j]) continue;
+                        let clonedBoard = clone(boardValues);
+                        clonedBoard[i][j] = color;
+                        if (checkIsWon(clonedBoard, color)) willWin = true;
+                    }
+                }
+                return  willWin;
+            }
+
+            const checkIsWon = (boardValues, color) => {
                 for (let i = 0; i < 3; i++) {
                     let isWon = true;
                     for (let j = 0; j < 3; j++) {
-                        if (boardValues[i][j] !== lastColor) {
+                        if (boardValues[i][j] !== color) {
                             isWon = false;
                         }
                     }
@@ -76,7 +96,7 @@
                 for (let i = 0; i < 3; i++) {
                     let isWon = true;
                     for (let j = 0; j < 3; j++) {
-                        if (boardValues[j][i] !== lastColor) {
+                        if (boardValues[j][i] !== color) {
                             isWon = false;
                         }
                     }
@@ -86,7 +106,7 @@
                 {
                     let isWon = true;
                     for (let i = 0; i < 3; i++) {
-                        if (boardValues[i][i] !== lastColor) {
+                        if (boardValues[i][i] !== color) {
                             isWon = false;
                         }
                     }
@@ -96,7 +116,7 @@
                 {
                     let isWon = true;
                     for (let i = 0; i < 3; i++) {
-                        if (boardValues[i][2-i] !== lastColor) {
+                        if (boardValues[i][2-i] !== color) {
                             isWon = false;
                         }
                     }
