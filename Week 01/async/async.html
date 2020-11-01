@@ -1,0 +1,80 @@
+
+<style>
+    .light {
+        display: inline-block;
+        width: 100px;
+        height: 100px;
+        margin: 30px;
+        border-radius: 50px;
+        background-color: grey;
+    }
+    .on.green {
+        background-color: green;
+    }
+    .on.red {
+        background-color: salmon;
+    }
+    .on.yellow {
+        background-color: yellow;
+    }
+
+    #next {
+        background-color: aquamarine;
+    }
+</style>
+
+<div class="light green"></div>
+<div class="light yellow"></div>
+<div class="light red"></div>
+<button id="next">next</button>
+
+<script>
+const wait = (sec) => {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve('switch color');
+        }, sec * 1000)
+    });
+}
+
+const customEvent = (element, eventName) => {
+    return new Promise((resolve, reject) => {
+        element.addEventListener(eventName, resolve)
+    });
+}
+
+const showColor = (color) => {
+    const lights = document.getElementsByTagName('div');
+    for (let i=0; i<3; i++) {
+        lights[i].classList.remove('on');
+    }
+    let onPos = color === 'green' ?  0 :
+                color === 'yellow' ? 1 :
+                color === 'red' ? 2 : null;
+    lights[onPos].classList.add('on');
+}
+
+const autoMode = async () => {
+    while (true) {
+        showColor('green')
+        await wait(10)
+        showColor('yellow')
+        await wait(2)
+        showColor('red')
+        await wait(5)
+    }
+};
+
+const manualMode = async () => {
+    const nextBtn = document.getElementById('next');
+    showColor('green')
+    await customEvent(nextBtn, 'click')
+    showColor('yellow')
+    await customEvent(nextBtn, 'click')
+    showColor('red')
+    await customEvent(nextBtn, 'click')
+};
+
+manualMode();
+
+</script>
