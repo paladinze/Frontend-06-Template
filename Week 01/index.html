@@ -45,7 +45,8 @@
                             if (currCellVal !== 0) {
                                 return;
                             }
-                            move(j, i)
+                            userMove(j, i)
+                            cpuMove()
                         });
                         board.append(cell);
                     }
@@ -54,7 +55,7 @@
                 console.log(getBestMove(boardValues, currColor));
             }
 
-            const move = (x, y) => {
+            const userMove = (x, y) => {
                 boardValues[y][x] = currColor;
                 if (checkIsWon(boardValues, currColor)) {
                     alert((currColor === 1 ? '🚀' : '🏎') + ' has won')
@@ -64,6 +65,11 @@
                 if (!!getWinMove(boardValues, currColor)) {
                     console.log((currColor === 1 ? '🚀' : '🏎') + ' will win')
                 }
+            };
+
+            const cpuMove = () => {
+                const { nextMove } = getBestMove(boardValues, currColor)
+                userMove(...nextMove)
             };
 
             const clone = (pattern) => {
@@ -143,7 +149,7 @@
                 }
 
                 // make the move that will cause the worst outcome for opponent
-                for (let i=0; i<3; i++) {
+                outer: for (let i=0; i<3; i++) {
                     for (let j=0; j<3; j++) {
                         if (boardValues[i][j]) {
                             continue;
@@ -154,6 +160,9 @@
                         if (-enemyBestChoice.reward > reward) {
                             reward = -enemyBestChoice.reward;
                             nextMove = [j, i];
+                        }
+                        if (reward === 1) {
+                            break outer;
                         }
                     }
                 }
