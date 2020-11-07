@@ -1,0 +1,77 @@
+
+<style>
+    .cell {
+        width: 30px;
+        height: 30px;
+        display: inline-block;
+        border: solid 1px salmon;
+        background-color: sandybrown;
+        font-size: 30px;
+        text-align: center;
+        vertical-align: middle;
+        line-height: 30px;
+    }
+</style>
+<div>
+    <div id="map"></div>
+    <button id="save-btn">Save map</button>
+</div>
+
+<script>
+    const mapWidth = 20;
+    const ActionTypes = {
+        ERASE: 'ERASE',
+        DRAW: 'DRAW',
+    }
+    const mapData = localStorage.getItem('mapData') ?
+        JSON.parse(localStorage.getItem('mapData')) : Array(mapWidth ** 2).fill(0);
+
+    const saveBtn = document.getElementById('save-btn');
+    saveBtn.addEventListener('click', () => {
+        console.log('save map')
+        console.log(mapData)
+        localStorage.setItem('mapData', JSON.stringify(mapData));
+    });
+
+    let container = document.getElementById('map');
+    const createCell = (cellVal, cellPosX, cellPosY) => {
+        const cell = document.createElement('div');
+        cell.innerText = cellVal === 1 ? '🧙‍️' : '👺';
+        cell.classList.add('cell');
+        cell.addEventListener('mousemove', () => {
+            if (actionType === ActionTypes.ERASE) {
+                cell.innerText = '👺';
+                mapData[cellPosY * mapWidth + cellPosX] = 0;
+            } else {
+                cell.innerText = '🧙‍';
+                mapData[cellPosY * mapWidth + cellPosX] = 1;
+            }
+        })
+        return cell;
+    }
+
+    for (let x=0; x<mapWidth; x++) {
+        for (let y=0; y<mapWidth; y++) {
+            const dataIdx = y * mapWidth + x;
+            const cellVal = mapData[dataIdx];
+
+            const cell = createCell(cellVal, x, y);
+            container.append(cell);
+        }
+        container.append(document.createElement('br'));
+    }
+
+    let mouseDown = false;
+    let actionType = 'DEFAULT';
+    document.addEventListener('mousedown', (e) => {
+        mouseDown = true;
+        actionType = e.button === 2 ? ActionTypes.ERASE : ActionTypes.DRAW;
+    });
+    document.addEventListener('mouseup', (e) => {
+        mouseDown = false;
+    });
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    })
+
+</script>
