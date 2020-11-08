@@ -20,6 +20,15 @@
 </div>
 
 <script>
+
+    const wait = (sec) => {
+        return new Promise((resolve, reject) => {
+            setTimeout(resolve, 1000 * sec);
+        })
+    }
+
+    const clone = (obj) => JSON.parse(JSON.stringify(obj));
+
     const mapWidth = 20;
     const CellTypes = {
         WALL: '🥶︎',
@@ -33,6 +42,7 @@
     }
     let mapData = localStorage.getItem('mapData') ?
         JSON.parse(localStorage.getItem('mapData')) : Array(mapWidth ** 2).fill(0);
+    let cleanMap =clone(mapData);
 
     const saveBtn = document.getElementById('save-btn');
     saveBtn.addEventListener('click', () => {
@@ -45,7 +55,7 @@
     clearBtn.addEventListener('click', () => {
         console.log('clear map')
         mapData = Array(mapWidth ** 2).fill(0);
-        drawBoard();
+        drawBoard(mapData);
     });
 
     const bfsBtn = document.getElementById('bfs-btn');
@@ -54,14 +64,14 @@
         const start = [1,1];
         const end = [12,12];
         getPathBfs(mapData, start, end)
-        print_path(mapData, history, start, end);
+        print_path(cleanMap, history, start, end);
     });
 
     let container = document.getElementById('map');
     const createCell = (cellVal, cellPosX, cellPosY) => {
         const cell = document.createElement('div');
         cell.innerText = cellVal === 1 ? CellTypes.WALL :
-                        cellVal === 999 ? CellTypes.PATH :
+                        cellVal === 2 ? CellTypes.PATH :
                         cellVal === 1000 ? CellTypes.START :
                         cellVal === 1001 ? CellTypes.END : '';
         cell.classList.add('cell');
@@ -78,7 +88,7 @@
         return cell;
     }
 
-    const drawBoard = () => {
+    const drawBoard = (mapData) => {
         container.innerHTML = '';
         for (let y=0; y<mapWidth; y++) {
             for (let x=0; x<mapWidth; x++) {
@@ -91,7 +101,7 @@
             container.append(document.createElement('br'));
         }
     };
-    drawBoard();
+    drawBoard(mapData);
 
 
     let mouseDown = false;
@@ -130,22 +140,15 @@
     };
 
     const print_path = async (map, pathArr, start, end) => {
-
-        const wait = (sec) => {
-            return new Promise((resolve, reject) => {
-                setTimeout(resolve, 1000 * sec);
-            })
-        }
-
-        map[start[0] + start[1] * mapWidth] = 1000;
-        map[end[0] + end[1] * mapWidth] = 1001;
-
+        const mapClone = JSON.parse(JSON.stringify(map));
+        mapClone[start[0] + start[1] * mapWidth] = 1000;
+        mapClone[end[0] + end[1] * mapWidth] = 1001;
 
         for (let pt of pathArr) {
             const [x, y] = pt;
-            map[x + y * mapWidth] = 999
-            await wait(0.1);
-            drawBoard();
+            mapClone[x + y * mapWidth] = 2;
+            await wait(0.05);
+            drawBoard(mapClone);
             console.log(pt)
         }
     }
