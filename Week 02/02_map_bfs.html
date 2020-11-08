@@ -42,7 +42,7 @@
     }
     let mapData = localStorage.getItem('mapData') ?
         JSON.parse(localStorage.getItem('mapData')) : Array(mapWidth ** 2).fill(0);
-    let cleanMap =clone(mapData);
+    let cleanMap = clone(mapData);
 
     const saveBtn = document.getElementById('save-btn');
     saveBtn.addEventListener('click', () => {
@@ -71,7 +71,7 @@
     const createCell = (cellVal, cellPosX, cellPosY) => {
         const cell = document.createElement('div');
         cell.innerText = cellVal === 1 ? CellTypes.WALL :
-                        cellVal === 2 ? CellTypes.PATH :
+                        typeof cellVal === 'object' ? CellTypes.PATH :
                         cellVal === 1000 ? CellTypes.START :
                         cellVal === 1001 ? CellTypes.END : '';
         cell.classList.add('cell');
@@ -127,29 +127,29 @@
         return x >= mapWidth || x < 0 || y >= mapWidth || y < 0;
     }
 
-    const addBlockToSearch = (map, searchQ, block) => {
+    const addBlockToSearch = (map, searchQ, block, preBlock) => {
         const [x, y] = block;
-        if (map[x + y * mapWidth] === 2 || map[x + y * mapWidth] === 1) {
+        if (map[x + y * mapWidth]) {
             return;
         }
         if (isOutOfBound(block)) {
             return;
         }
         searchQ.push(block);
-        map[block[0] + block[1] * mapWidth] = 2;
+        map[block[0] + block[1] * mapWidth] = preBlock;
     };
 
     const print_path = async (map, pathArr, start, end) => {
-        const mapClone = JSON.parse(JSON.stringify(map));
+        const mapClone = clone(map);
+        console.log(map)
         mapClone[start[0] + start[1] * mapWidth] = 1000;
         mapClone[end[0] + end[1] * mapWidth] = 1001;
 
         for (let pt of pathArr) {
             const [x, y] = pt;
-            mapClone[x + y * mapWidth] = 2;
-            await wait(0.05);
+            mapClone[x + y * mapWidth] = [];
+            await wait(0.01);
             drawBoard(mapClone);
-            console.log(pt)
         }
     }
 
@@ -160,17 +160,21 @@
         while (searchQ.length) {
             const try_block = searchQ.shift();
             history.push(try_block);
-            map[try_block[0] + try_block[1] * mapWidth] = 2;
 
             if (isSamePoint(try_block, end)) {
                 console.log('target reached!')
                 break;
             }
 
-            addBlockToSearch(map, searchQ, [try_block[0] + 1, try_block[1]]);
-            addBlockToSearch(map, searchQ, [try_block[0] - 1, try_block[1]]);
-            addBlockToSearch(map, searchQ, [try_block[0], try_block[1] + 1]);
-            addBlockToSearch(map, searchQ, [try_block[0], try_block[1] - 1]);
+            addBlockToSearch(map, searchQ, [try_block[0] + 1, try_block[1]], try_block);
+            addBlockToSearch(map, searchQ, [try_block[0] - 1, try_block[1]], try_block);
+            addBlockToSearch(map, searchQ, [try_block[0], try_block[1] + 1], try_block);
+            addBlockToSearch(map, searchQ, [try_block[0], try_block[1] - 1], try_block);
+
+            addBlockToSearch(map, searchQ, [try_block[0] + 1, try_block[1] + 1], try_block);
+            addBlockToSearch(map, searchQ, [try_block[0] + 1, try_block[1] - 1], try_block);
+            addBlockToSearch(map, searchQ, [try_block[0] - 1, try_block[1] - 1], try_block);
+            addBlockToSearch(map, searchQ, [try_block[0] - 1, try_block[1] + 1], try_block);
         }
         console.log('path searching finished')
     }
