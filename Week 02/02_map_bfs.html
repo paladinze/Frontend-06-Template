@@ -1,0 +1,176 @@
+
+<style>
+    .cell {
+        width: 30px;
+        height: 30px;
+        display: inline-block;
+        border: solid 1px darkgrey;
+        background-color: grey;
+        font-size: 30px;
+        text-align: center;
+        vertical-align: middle;
+        line-height: 30px;
+    }
+</style>
+<div>
+    <div id="map"></div>
+    <button id="save-btn">Save map</button>
+    <button id="clear-btn">clear map</button>
+    <button id="bfs-btn">start bfs</button>
+</div>
+
+<script>
+    const mapWidth = 20;
+    const CellTypes = {
+        WALL: '🥶︎',
+        PATH: '🦖',
+        START: '🚀',
+        END: '🚩',
+    };
+    const ActionTypes = {
+        ERASE: 'ERASE',
+        DRAW: 'DRAW',
+    }
+    let mapData = localStorage.getItem('mapData') ?
+        JSON.parse(localStorage.getItem('mapData')) : Array(mapWidth ** 2).fill(0);
+
+    const saveBtn = document.getElementById('save-btn');
+    saveBtn.addEventListener('click', () => {
+        console.log('save map')
+        console.log(mapData)
+        localStorage.setItem('mapData', JSON.stringify(mapData));
+    });
+
+    const clearBtn = document.getElementById('clear-btn');
+    clearBtn.addEventListener('click', () => {
+        console.log('clear map')
+        mapData = Array(mapWidth ** 2).fill(0);
+        drawBoard();
+    });
+
+    const bfsBtn = document.getElementById('bfs-btn');
+    bfsBtn.addEventListener('click', () => {
+        console.log('bfs search')
+        const start = [1,1];
+        const end = [12,12];
+        getPathBfs(mapData, start, end)
+        print_path(mapData, history, start, end);
+    });
+
+    let container = document.getElementById('map');
+    const createCell = (cellVal, cellPosX, cellPosY) => {
+        const cell = document.createElement('div');
+        cell.innerText = cellVal === 1 ? CellTypes.WALL :
+                        cellVal === 999 ? CellTypes.PATH :
+                        cellVal === 1000 ? CellTypes.START :
+                        cellVal === 1001 ? CellTypes.END : '';
+        cell.classList.add('cell');
+        cell.addEventListener('mousemove', () => {
+            if (!mouseDown) return;
+            if (actionType === ActionTypes.ERASE) {
+                cell.innerText = '';
+                mapData[cellPosY * mapWidth + cellPosX] = 0;
+            } else {
+                cell.innerText = CellTypes.WALL;
+                mapData[cellPosY * mapWidth + cellPosX] = 1;
+            }
+        })
+        return cell;
+    }
+
+    const drawBoard = () => {
+        container.innerHTML = '';
+        for (let y=0; y<mapWidth; y++) {
+            for (let x=0; x<mapWidth; x++) {
+                const dataIdx = y * mapWidth + x;
+                const cellVal = mapData[dataIdx];
+
+                const cell = createCell(cellVal, x, y);
+                container.append(cell);
+            }
+            container.append(document.createElement('br'));
+        }
+    };
+    drawBoard();
+
+
+    let mouseDown = false;
+    let actionType = 'DEFAULT';
+    document.addEventListener('mousedown', (e) => {
+        mouseDown = true;
+        actionType = e.button === 2 ? ActionTypes.ERASE : ActionTypes.DRAW;
+    });
+    document.addEventListener('mouseup', (e) => {
+        mouseDown = false;
+    });
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    })
+
+    // bfs search algo
+    const isSamePoint = (pointA, pointB) => {
+      return pointA[0] === pointB[0] && pointA[1] === pointB[1];
+    };
+
+    const isOutOfBound = (point) => {
+        const [x, y] = point;
+        return x >= mapWidth || x < 0 || y >= mapWidth || y < 0;
+    }
+
+    const addBlockToSearch = (map, searchQ, block) => {
+        const [x, y] = block;
+        if (map[x + y * mapWidth] === 2 || map[x + y * mapWidth] === 1) {
+            return;
+        }
+        if (isOutOfBound(block)) {
+            return;
+        }
+        searchQ.push(block);
+        map[block[0] + block[1] * mapWidth] = 2;
+    };
+
+    const print_path = async (map, pathArr, start, end) => {
+
+        const wait = (sec) => {
+            return new Promise((resolve, reject) => {
+                setTimeout(resolve, 1000 * sec);
+            })
+        }
+
+        map[start[0] + start[1] * mapWidth] = 1000;
+        map[end[0] + end[1] * mapWidth] = 1001;
+
+
+        for (let pt of pathArr) {
+            const [x, y] = pt;
+            map[x + y * mapWidth] = 999
+            await wait(0.1);
+            drawBoard();
+            console.log(pt)
+        }
+    }
+
+    const history = [];
+    const getPathBfs = (map, start, end) => {
+        const searchQ = [start];
+
+        while (searchQ.length) {
+            const try_block = searchQ.shift();
+            history.push(try_block);
+            map[try_block[0] + try_block[1] * mapWidth] = 2;
+
+            if (isSamePoint(try_block, end)) {
+                console.log('target reached!')
+                break;
+            }
+
+            addBlockToSearch(map, searchQ, [try_block[0] + 1, try_block[1]]);
+            addBlockToSearch(map, searchQ, [try_block[0] - 1, try_block[1]]);
+            addBlockToSearch(map, searchQ, [try_block[0], try_block[1] + 1]);
+            addBlockToSearch(map, searchQ, [try_block[0], try_block[1] - 1]);
+        }
+        console.log('path searching finished')
+    }
+
+
+</script>
