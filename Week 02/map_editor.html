@@ -4,8 +4,8 @@
         width: 30px;
         height: 30px;
         display: inline-block;
-        border: solid 1px salmon;
-        background-color: sandybrown;
+        border: solid 1px darkgrey;
+        background-color: grey;
         font-size: 30px;
         text-align: center;
         vertical-align: middle;
@@ -19,6 +19,9 @@
 
 <script>
     const mapWidth = 20;
+    const StrokeTypes = {
+        WALL: '🥶︎'
+    };
     const ActionTypes = {
         ERASE: 'ERASE',
         DRAW: 'DRAW',
@@ -36,14 +39,14 @@
     let container = document.getElementById('map');
     const createCell = (cellVal, cellPosX, cellPosY) => {
         const cell = document.createElement('div');
-        cell.innerText = cellVal === 1 ? '🧙‍️' : '👺';
+        cell.innerText = cellVal === 1 ? StrokeTypes.WALL : '';
         cell.classList.add('cell');
         cell.addEventListener('mousemove', () => {
             if (actionType === ActionTypes.ERASE) {
-                cell.innerText = '👺';
+                cell.innerText = '';
                 mapData[cellPosY * mapWidth + cellPosX] = 0;
             } else {
-                cell.innerText = '🧙‍';
+                cell.innerText = StrokeTypes.WALL;
                 mapData[cellPosY * mapWidth + cellPosX] = 1;
             }
         })
