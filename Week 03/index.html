@@ -1,0 +1,114 @@
+<script>
+const EXP_TYPE = {
+    MULTI: 'multiplicative expression',
+    ADD: 'additive expression',
+};
+
+const TOKEN_TYPE = {
+    NUMBER: 'Number',
+    WHITESPACE: 'Whitespace',
+    NEWLINE: 'LineTerminator',
+};
+
+const symbols = ['Number', 'Whitespace', 'LineTerminator', '*', '/', '+', '-'];
+const regexp = /([0-9.]+)|([ \t])|([\r\n])|(\*)|(\/)|(\+)|(-)/g;
+
+function* tokenize (source) {
+    let prevlastIndex;
+    while (true) {
+        let token = {
+            type: null,
+            value: null,
+        };
+        prevlastIndex = regexp.lastIndex;
+        const result = regexp.exec(source);
+        if (!result) break;
+        if (regexp.lastIndex - prevlastIndex > result[0].length ) {
+            // encounters unknown symbols
+            break;
+        }
+
+        for (let i=0; i<symbols.length; i++) {
+            if (result[i+1]) {
+                token.type = symbols[i];
+                token.value = result[i+1];
+            }
+        }
+        yield token;
+    }
+    yield {
+        type: 'EOF',
+        value: null,
+    }
+}
+
+const input = '10 * 25';
+const tokens = [];
+
+for (let token of tokenize(input)) {
+    if ([TOKEN_TYPE.NEWLINE, TOKEN_TYPE.WHITESPACE].includes(token.type)) continue;
+    tokens.push(token);
+}
+//
+// Rules for generative expressions
+// <Expression> ::=
+//     <AdditiveExpression><EOF>
+//
+//     <AdditiveExpression> ::=
+//         <MultiplicativeExpression>
+//             |<AdditiveExpression><+><MultiplicativeExpression>
+//             |<AdditiveExpression><-><MultiplicativeExpression>
+
+
+const exp = () => {
+
+};
+
+const addExp = () => {
+
+};
+
+const mulExp = (source) => {
+    if (source[0].type === TOKEN_TYPE.NUMBER) {
+        const node = {
+            type: EXP_TYPE.MULTI,
+            children: [source[0]],
+        }
+        source[0] = node;
+        return mulExp(source);
+    }
+    if (source[0].type === EXP_TYPE.MULTI
+        && source[1] && source[1].type === '*') {
+        const node = {
+            type: EXP_TYPE.MULTI,
+            operator: '*',
+            children: []
+        }
+        node.children.push(source.shift());
+        node.children.push(source.shift());
+        node.children.push(source.shift());
+        source.unshift(node);
+        return mulExp(source);
+    }
+    if (source[0].type === EXP_TYPE.MULTI
+        && source[1] && source[1].type === '/') {
+        const node = {
+            type: EXP_TYPE.MULTI,
+            operator: '/',
+            children: []
+        }
+        node.children.push(source.shift());
+        node.children.push(source.shift());
+        node.children.push(source.shift());
+        source.unshift(node);
+        return mulExp(source);
+    }
+    if (source[0].type === EXP_TYPE.MULTI) {
+        return source[0];
+    }
+};
+
+console.log(tokens);
+const ast = mulExp(tokens);
+console.log(ast);
+</script>
