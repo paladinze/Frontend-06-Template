@@ -2,12 +2,14 @@
 const EXP_TYPE = {
     MULTI: 'multiplicative expression',
     ADD: 'additive expression',
+    EXP: 'expression'
 };
 
 const TOKEN_TYPE = {
     NUMBER: 'Number',
     WHITESPACE: 'Whitespace',
     NEWLINE: 'LineTerminator',
+    EOF: 'EOF'
 };
 
 const symbols = ['Number', 'Whitespace', 'LineTerminator', '*', '/', '+', '-'];
@@ -37,12 +39,12 @@ function* tokenize (source) {
         yield token;
     }
     yield {
-        type: 'EOF',
+        type: TOKEN_TYPE.EOF,
         value: null,
     }
 }
 
-const input = '10 * 25';
+const input = '10 * 25 + 3';
 const tokens = [];
 
 for (let token of tokenize(input)) {
@@ -54,18 +56,73 @@ for (let token of tokenize(input)) {
 // <Expression> ::=
 //     <AdditiveExpression><EOF>
 //
-//     <AdditiveExpression> ::=
-//         <MultiplicativeExpression>
-//             |<AdditiveExpression><+><MultiplicativeExpression>
-//             |<AdditiveExpression><-><MultiplicativeExpression>
+// <AdditiveExpression> ::=
+//     <MultiplicativeExpression>
+//         |<AdditiveExpression><+><MultiplicativeExpression>
+//         |<AdditiveExpression><-><MultiplicativeExpression>
+// <MultiplicativeExpression> ::=
+//     <Number>
+//         |<MultiplicativeExpression><*>
+//         |<MultiplicativeExpression></>
 
 
-const exp = () => {
-
+const exp = (source) => {
+    if (source[0].type === EXP_TYPE.ADD
+        && source[1] && source[1].type === TOKEN_TYPE.EOF) {
+        const node = {
+            type: EXP_TYPE.EXP,
+            children: [source.shift(), source.shift()]
+        };
+        return node;
+    }
+    addExp(source);
+    return exp(source);
 };
 
-const addExp = () => {
-
+const addExp = (source) => {
+    if (source[0].type === EXP_TYPE.MULTI) {
+        const node = {
+            type: EXP_TYPE.ADD,
+            children: [source[0]]
+        }
+        source[0] = node;
+        return source;
+    }
+    if (source[0].type === EXP_TYPE.ADD
+        && source[1] && source[1].type === '+'
+    ) {
+        const node = {
+            type: EXP_TYPE.ADD,
+            operator: '+',
+            children: []
+        };
+        node.children.push(source.shift());
+        node.children.push(source.shift());
+        mulExp(source);
+        node.children.push(source.shift());
+        source.unshift(node);
+        return addExp(source);
+    }
+    if (source[0].type === EXP_TYPE.ADD
+        && source[1] && source[1].type === '-'
+    ) {
+        const node = {
+            type: EXP_TYPE.ADD,
+            operator: '-',
+            children: []
+        };
+        node.children.push(source.shift());
+        node.children.push(source.shift());
+        mulExp(source);
+        node.children.push(source.shift());
+        source.unshift(node);
+        return addExp(source);
+    }
+    if (source[0].type === EXP_TYPE.ADD) {
+        return source[0];
+    }
+    mulExp(source);
+    return addExp(source);
 };
 
 const mulExp = (source) => {
@@ -109,6 +166,6 @@ const mulExp = (source) => {
 };
 
 console.log(tokens);
-const ast = mulExp(tokens);
+const ast = exp(tokens);
 console.log(ast);
 </script>
