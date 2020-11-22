@@ -1,0 +1,66 @@
+<script>
+const wordEndSymbol = Symbol('$');
+
+class Trie {
+    constructor() {
+        this.root = Object.create(null);
+    }
+
+    insert(word) {
+        let node = this.root;
+        for (let i=0; i<word.length; i++) {
+            const char = word[i];
+            if (!node[char]) {
+                node[char] = Object.create(null);
+            }
+            node = node[char];
+        }
+        if (!node[wordEndSymbol]) {
+            node[wordEndSymbol] = 0;
+        }
+        node[wordEndSymbol] ++;
+    }
+
+    getMaxOccur() {
+        let maxWord = '';
+        let maxCount = 0;
+
+        const visit = (node, word) => {
+            if (wordEndSymbol in node) {
+                if (node[wordEndSymbol] > maxCount) {
+                    maxCount = node[wordEndSymbol];
+                    maxWord = word;
+                }
+            }
+            for (let key in node) {
+                visit(node[key], word + key);
+            }
+        };
+
+        visit(this.root, '')
+        return maxCount;
+    }
+}
+
+const getRandomWord = (wordLen) => {
+    let theWord = '';
+    for (let i=0; i<wordLen; i++) {
+        theWord += String.fromCharCode('a'.charCodeAt(0) + Math.random() * 26);
+    }
+    return theWord;
+}
+
+const main = () => {
+    const trie = new Trie();
+    // for (let i=0; i<10000; i++) {
+    //     trie.insert(getRandomWord(5));
+    // }
+    trie.insert('abc')
+    trie.insert('abc')
+    trie.insert('abd')
+    console.log(trie);
+    console.log("max occurrence of a word", trie.getMaxOccur());
+}
+
+main();
+</script>

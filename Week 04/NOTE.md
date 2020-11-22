@@ -14,3 +14,16 @@
 - find[]
     - traverse the tree
     - each end symbol indicates a word is found
+
+
+# KMP
+
+## why KMP
+- substring matching
+
+## principle
+- use repetition in the source string to save some matching effor  
+
+## steps
+- generate prefix table (next table)
+- use the table to optimize where to continue searching in case of mismatch
