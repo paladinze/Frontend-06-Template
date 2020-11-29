@@ -1,7 +1,13 @@
+<input id="input1" type="range" min=0 max=255 />
+<input id="input2" type="range" min=0 max=255 />
+<input id="input3" type="range" min=0 max=255 />
+
+<div id="color" style="width:100px; height:100px;"></div>
 <script>
 const obj = {
-    a: {b: 3},
-    b: 2,
+    r: 0,
+    g: 0,
+    b: 0,
 }
 
 const cbs = new Map();
@@ -11,8 +17,26 @@ let usedReactivities = [];
 
 const po = reactive(obj);
 
+
+const input1 = document.getElementById('input1');
+const input2 = document.getElementById('input2');
+const input3 = document.getElementById('input3');
+const color = document.getElementById('color');
+
+input1.addEventListener('input', (event) => { po.r = event.target.value; })
+input2.addEventListener('input', (event) => { po.g = event.target.value; })
+input3.addEventListener('input', (event) => { po.b = event.target.value; })
 effect(() => {
-    console.log(po.a.b)
+    input1.value = po.r;
+})
+effect(() => {
+    input2.value = po.g;
+})
+effect(() => {
+    input3.value = po.b;
+})
+effect(() => {
+    color.style.backgroundColor = `rgb(${po.r},${po.g},${po.b})`
 })
 
 function effect(cb) {
