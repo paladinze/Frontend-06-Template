@@ -1,17 +1,18 @@
 <script>
 const obj = {
-    a: 1,
+    a: {b: 3},
     b: 2,
 }
 
 const cbs = new Map();
+let reactivities = new Map();
 
 let usedReactivities = [];
 
 const po = reactive(obj);
 
 effect(() => {
-    console.log(po.a)
+    console.log(po.a.b)
 })
 
 function effect(cb) {
@@ -31,7 +32,11 @@ function effect(cb) {
 }
 
 function reactive(obj) {
-    return new Proxy(obj, {
+    if (reactivities.has(obj)) {
+        return reactivities.get(obj);
+    }
+
+    let proxy = new Proxy(obj, {
         set(obj, prop, val) {
             obj[prop] = val;
             if (cbs.has(obj) && cbs.get(obj).has(prop)) {
@@ -44,10 +49,15 @@ function reactive(obj) {
 
         get(obj, prop) {
             usedReactivities.push([obj, prop])
+            if( typeof obj[prop] === 'object') {
+                return reactive(obj[prop]);
+            }
             return obj[prop];
         }
     })
 
+    reactivities.set(obj, proxy);
+    return proxy;
 }
 
 
