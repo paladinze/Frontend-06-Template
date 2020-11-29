@@ -1,0 +1,84 @@
+<div id="draggable" style="display: inline-block; background-color: mediumseagreen; width: 250px; height: 250px;"></div>
+<div id="text-container" style="font-size: 45px">
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+    text text text text text text text text text text
+</div>
+
+
+<script>
+const draggable = document.getElementById('draggable');
+let baseX = 0, baseY = 0;
+draggable.addEventListener('mousedown', (event) => {
+    let startX = event.clientX;
+    let startY = event.clientY;
+
+    const onMoveHandler = (event) => {
+        // draggable.style.transform = `translate(${baseX + event.clientX - startX}px, ${baseY + event.clientY - startY}px)`
+        const theRange = getNearestRange(event.clientX, event.clientY);
+        theRange.insertNode(draggable);
+    }
+    const onUpHandler = (event) => {
+        baseX += event.clientX - startX;
+        baseY += event.clientY - startY;
+        document.removeEventListener('mousemove', onMoveHandler);
+        document.removeEventListener('mouseup', onUpHandler);
+    }
+    document.addEventListener('mousemove', onMoveHandler);
+    document.addEventListener('mouseup', onUpHandler);
+})
+
+const textContainer = document.getElementById('text-container');
+const ranges = [];
+
+for (let i=0; i<textContainer.childNodes[0].textContent.length; i++) {
+    const range = document.createRange();
+    range.setStart(textContainer.childNodes[0], i);
+    range.setEnd(textContainer.childNodes[0], i);
+    ranges.push(range);
+}
+
+function getNearestRange(x, y) {
+    let minVal = Infinity;
+    let theRange = null;
+    for (let range of ranges) {
+        const bound = range.getBoundingClientRect();
+        const distance = (bound.x - x) ** 2 + (bound.y - y) ** 2;
+        if (distance < minVal) {
+            theRange = range;
+            minVal = distance;
+        }
+    }
+    return theRange;
+}
+
+
+document.addEventListener('selectstart', event => event.preventDefault());
+</script>
