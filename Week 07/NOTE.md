@@ -1,3 +1,16 @@
+# JavaScrupt
+
+## anatomy of a language
+- atom
+- expression
+- statement
+    - declaration (preprocessing/ hoisting)
+- structure
+    - completion record
+    - lexical env
+- module
+- program
+
 
 ## closure
 - every function is a closure
