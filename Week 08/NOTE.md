@@ -24,3 +24,14 @@ while(input) {
     state = state(input)
 }
 ```
+
+# HTTP
+
+## what
+- text-based protocol
+- request structure
+    - request line
+    - headers
+    - body
+- response structure
+    - status line
