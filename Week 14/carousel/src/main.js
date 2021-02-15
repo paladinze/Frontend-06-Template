@@ -19,25 +19,57 @@ class Carousel extends Component {
             imgEl.style.backgroundImage = `url('${imgSrc}')`;
             this.root.appendChild(imgEl);
         }
-        let currentIndex = 0;
-        setInterval(() => {
-            const children = this.root.children;
-            const nextIndex = (currentIndex + 1) % children.length;
 
-            const current = children[currentIndex];
-            const next = children[nextIndex];
+        // let currentIndex = 0;
+        // setInterval(() => {
+        //     const children = this.root.children;
+        //     const nextIndex = (currentIndex + 1) % children.length;
+        //
+        //     const current = children[currentIndex];
+        //     const next = children[nextIndex];
+        //
+        //     next.style.transition = "none";
+        //     next.style.transform = `translatex(${100 - 100 * nextIndex}%)`;
+        //
+        //     setTimeout(() => {
+        //         next.style.transition = "";
+        //         current.style.transform = `translateX(${-100 - currentIndex * 100}%)`;
+        //         next.style.transform = `translateX(${- nextIndex * 100}%)`;
+        //
+        //         currentIndex = nextIndex;
+        //     }, 16);
+        // }, 3000);
 
-            next.style.transition = "none";
-            next.style.transform = `translatex(${100 - 100 * nextIndex}%)`;
+        let position = 0;
 
-            setTimeout(() => {
-                next.style.transition = "";
-                current.style.transform = `translateX(${-100 - currentIndex * 100}%)`;
-                next.style.transform = `translateX(${- nextIndex * 100}%)`;
+        this.root.addEventListener("mousedown", event => {
+           const children = this.root.children;
+           let startX = event.clientX;
 
-                currentIndex = nextIndex;
-            }, 16);
-        }, 3000);
+           const handleMove = event => {
+               let x = event.clientX - startX;
+               for (let child of children) {
+                   child.style.transition = "none";
+                   child.style.transform = `translateX(${- position * 500 + x}px)`;
+               }
+           };
+
+            const handleUp = event => {
+                let x = event.clientX - startX;
+                position -= Math.round(x / 500);
+                for (let child of children) {
+                    child.style.transition = "";
+                    child.style.transform = `translateX(${- position * 500}px)`;
+                }
+                document.removeEventListener('mousemove', handleMove);
+                document.removeEventListener('mouseup', handleUp);
+            };
+
+            document.addEventListener("mousemove", handleMove);
+            document.addEventListener("mouseup", handleUp);
+        });
+
+
         return this.root;
     }
 }
