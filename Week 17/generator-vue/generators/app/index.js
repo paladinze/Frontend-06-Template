@@ -12,34 +12,51 @@ module.exports = class extends Generator {
 
     }
 
-
-    async method2() {
-        this.log('method 2 just ran');
-        const answers = await this.prompt([
-            {
-                type: "input",
-                name: "name",
-                message: "Your project name",
-            }
-        ]);
-        this.fs.copyTpl(
-            this.templatePath('index.html'),
-            this.destinationPath('public/index.html'),
-            { title: answers.name }
-        );
-    }
-
     async initPackages() {
+        const answer = await this.prompt([{
+            type: "input",
+            name: "name",
+            message: "your project name: ",
+            default: this.appname // use folder name as default
+        }]);
         const pkgJson = {
-            devDependencies: {
-                eslint: '^3.15.0'
-            },
-            dependencies: {
-                react: '^16.2.0'
+                "name": answer.name,
+                "version": "1.0.0",
+                "description": "",
+                "main": "index.js",
+                "scripts": {
+                    "test": "echo \"Error: no test specified\" && exit 1"
+                },
+                "author": "",
+                "license": "ISC",
+                "dependencies": {}
             }
-        };
+        ;
 
         this.fs.extendJSON(this.destinationPath('package.json'), pkgJson);
-        this.npmInstall();
+        this.npmInstall(["vue"], {'save-dev': false});
+        this.npmInstall(["webpack", "vue-loader", "vue-template-compiler"], {'save-dev': true});
+        this.npmInstall(["vue-style-loader", "css-loader", "copy-webpack-plugin",], {'save-dev': true});
+
+        this.fs.copyTpl(
+            this.templatePath('HelloWorld.vue'),
+            this.destinationPath('src/index.vue'),
+            {},
+        );
+        this.fs.copyTpl(
+            this.templatePath('webpack.config.js'),
+            this.destinationPath('webpack.config.js'),
+            {},
+        );
+        this.fs.copyTpl(
+            this.templatePath('main.js'),
+            this.destinationPath('src/main.js'),
+            {},
+        );
+        this.fs.copyTpl(
+            this.templatePath('index.html'),
+            this.destinationPath('src/index.html'),
+            {title: answer.name},
+        );
     }
 };

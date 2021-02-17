@@ -1,17 +1,18 @@
 {
-  "name": "generator-vue",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "yeoman-generator"
-  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "yeoman-generator": "^4.13.0"
+    "vue": "^2.6.12"
+  },
+  "name": "my-vue",
+  "devDependencies": {
+    "@babel/core": "^7.12.16",
+    "@babel/preset-env": "^7.12.16"
   }
 }
